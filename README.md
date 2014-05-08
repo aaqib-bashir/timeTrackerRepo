@@ -11,5 +11,5 @@ Mail alerts can also be sent by the ADMIN, about the various tasks performed by 
 
 ===============================================================================================
 REQUIREMENTS
-Windows 7 or later
-Works best in google chrome and firefox
+Windows 7 or later.
+Works best in google chrome and firefox.
