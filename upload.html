@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+    <link rel="stylesheet" href="default.css">
+<meta charset="utf-8">
+<script type="text/javascript" src="jquery.js">
+</script>
+<script type="application/javascript">
+
+$(document).ready(function() {
+	
+	function isValidDate(str) {
+	var d=new Date(str);
+	var dat =str.split("-");
+	var dd=d.getDate();
+	var mm=d.getMonth()+1;
+	var yy=d.getFullYear();
+	if(d!="Invalid Date"){
+		if(dat[0]!=yy||dat[1]!=mm||dat[2]!=dd)
+		{
+		return false;
+		}
+		else{
+			return true;
+			}
+		}
+		else
+		{
+			return false;
+			}
+		
+}
+	
+	function isvalidTime (str) {
+		t=str.split(":")
+		if(t.length<3)
+		{
+			return false;
+			}
+			else{
+		var hh=t[0];
+		var mm=t[1];
+		var ss=t[2];
+		if(hh.toString()==""||mm.toString()==""||ss.toString()=="")
+		{
+			return false;
+			}
+		if(hh<=23&&mm<=60&&ss<=60){
+			return true;
+			}
+			else
+			{
+				return false;
+				}
+			}
+}
+
+function duration(startdate, enddate, starttime, endtime){
+	var sd=new Date(startdate);
+	var ed=new Date(enddate);
+	var std=starttime.split(":");
+	var etd=endtime.split(":");
+	sd.setHours(std[0],std[1],std[2]);
+	ed.setHours(etd[0],etd[1],etd[2]);
+	var sdm=sd.getTime();
+	var edm=ed.getTime();
+	var t=edm-sdm;
+	function msToTime(s) {
+  var ms = s % 1000;
+  s = (s - ms) / 1000;
+  var secs = s % 60;
+  s = (s - secs) / 60;
+  var mins = s % 60;
+  var hrs = (s - mins) / 60;
+
+  return hrs + ':' + mins + ':' + secs;
+}
+return msToTime(t);
+	}
+
+	var inputrad="";
+	var data_for_fd=""
+	var sampleData = "task_name,project,start_time,end_time,start_date,end_date";
+ $("#download_sample").click(function popup() {
+    $("#download_sample").append('<form id="exportform" action="sample.php" method="post" target="_blank"><input type="hidden" id="exportdata" name="exportdata" /></form>');
+	$("#exportdata").val();
+	$("#exportdata").val(sampleData);
+    $("#exportform").submit().remove();
+    return true; 
+});
+
+
+$("#upload").click(function(){
+var fd = inputrad;
+var filename=$("#file").val();
+function fileDataCheck(fd){
+	 data_for_fd=""
+	var data=fd.split(" ");
+	if(filename!=""){
+	if(((data[1].toString()=="task_name") && (data[2].toString()=="project") && (data[3].toString()=="start_time") && (data[4].toString()=="end_time") && (data[5].toString()=="start_date") && (data[6].toString()=="end_date"))){
+		for(var i=7;i<data.length-1;i=i+6){
+			if(data[i]!=""){
+			data_for_fd=data_for_fd+" "+data[i];
+			}
+			else
+			{
+				return false;
+				}
+			data_for_fd=data_for_fd+" "+data[i+1];
+			
+			if(isvalidTime(data[i+2].toString())==true){
+			data_for_fd=data_for_fd+" "+data[i+2];
+			}
+			else
+			{
+				return false;
+				}
+				if(isvalidTime(data[i+3].toString())==true){
+			data_for_fd=data_for_fd+" "+data[i+3];
+			}
+			else
+			{
+				return false;
+				}
+				if(isValidDate(data[i+4].toString())== true && isValidDate(data[i+5].toString())== true){
+					var d = duration(data[i+4],data[i+5],data[i+2],data[i+3]);
+					var h=d.split(":");
+					if(h[0]<0)
+					{
+						return false;
+						}
+						else{
+			data_for_fd=data_for_fd+" "+data[i+4];
+			data_for_fd=data_for_fd+" "+d;
+						}
+				}
+				else{
+					return false;
+					}
+			}
+	return true;
+	}
+	}
+	else{
+	alert("upload file first");
+	}
+	}
+
+if(fileDataCheck(fd)==true){
+	fd=data_for_fd;
+$.ajax({
+	type:'post',
+	url:'upload file.php',
+	data:'fd='+fd,
+	success: function(msg){
+		$("#file_status").empty();
+                $("#messages").html("<b>"+msg+"</b>").fadeOut(3000);
+		$("#file_status").html(msg);
+		$("#file").val("");
+		$("#task_table").load("taskPage.php");
+	}
+	
+});
+}
+else
+{
+	$("#file_status").html("file is not in correct format");
+	}
+});
+
+$("#file").change(function(e) {
+	inputrad="";
+var ext = $("input#file").val().split(".").pop().toLowerCase();
+
+if($.inArray(ext, ["csv"]) == -1) {
+alert('Upload CSV Only');
+$("#file_status").html("Invalid File");
+return false;
+}
+   else{ 
+   $("#file_status").html("Vaild File");
+if (e.target.files != undefined) {
+var reader = new FileReader();
+reader.onload = function(e) {
+var csvval=e.target.result.split("\n");
+
+for(var c=0;c< csvval.length;c++)
+{
+var csvvalue=csvval[c].split(",");
+for(var i=0;i<6;i++)
+{
+var temp=csvvalue[i].replace("&#34","");
+inputrad=inputrad+" "+temp.trim();
+}
+}
+
+};
+reader.readAsText(e.target.files.item(0));
+}
+   }
+return false;
+
+});
+});
+
+</script>
+</head>
+<body>
+    <form align="center">
+        <br><br><br>
+<input type="file"  id="file" name="file" accept=".csv">
+<input type="submit" id="upload" name="upload" value="Upload"><br><br><br>
+<input type="button" id="download_sample" name="download_sample" value="Download Sample"><br><br><br>
+<div id="file_status" name="file_status"></div>
+<div id="csvimporthint"></div>
+<a href="" id="cancel" title='cancel'>X</a>
+    </form>
+</body>
+</html>

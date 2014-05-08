@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Untitled Document</title>
+<script type="text/javascript" src="jquery.js">
+</script>
+<script src="highcharts.js"></script>
+<script type="application/javascript">
+$(document).ready(function() {
+	var chart;
+	$.ajax({
+		type:"POST",
+		url:"load_project.php",
+		success: function(msg){
+			$("#load_project").html(msg);
+			}
+		});
+				
+    $.ajax({
+		type:"POST",
+		url:"task_in_project.php",
+		success: function(msg){
+			chart.series[0].setData(JSON.parse(msg));
+			}
+		});
+                
+                $("#load_project").change(function(){
+                    p=$('#p option:selected').text();
+                    $.ajax({
+                        type:"POST",
+		        data: "p="+p,
+		        url:"load_select_project.php",
+		        success: function(msg){
+			chart.series[0].setData(JSON.parse(msg));
+			}
+                    });
+                    });
+		
+	 chart = new Highcharts.Chart({
+        chart: {
+            plotBackgroundColor: null,
+	    renderTo:'container1',
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: ''
+        },
+        tooltip: {
+    	    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    color: '#000000',
+                    connectorColor: '#000000',
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Task Share',
+            data: []
+			
+        },
+		]
+    });
+	});
+
+    
+</script>
+</head>
+
+<body>
+    <p align="center">Task percent in a project<div align="center" id="load_project"></div></p>
+
+<div id="container1" align="center" style="min-width: 500px; height: 500px; margin: 0 auto">
+
+
+</div>
+
+</body>
+</html>

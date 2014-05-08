@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+    <link rel='stylesheet' href="../CSS/header_style.css">
+    <link rel='stylesheet' href="../CSS/default.css">
+<script type="text/javascript" src="jquery.js">
+</script>
+<script type="application/javascript">
+$(document).ready(function() {
+    $.ajax({
+       type:"POST",
+       url:"checkAdmin.php",
+       success:function(msg){
+           if(msg!="ok"){
+           window.location=".././login.html";
+           }
+           
+       }
+    });
+    $.ajax({
+		type:"POST",
+		url:"getUser.php",
+		success: function(msg){
+			$("#users_area").html(msg);
+			}
+		});
+		
+	$("#sendMail").click(function(){
+		var str="";
+		var current_date=$("#current_date").val();
+		var weekend=$("#weekend").val();
+     $('#users:checked').each(function() {
+       str=str+$(this).val()+",";
+     });
+	 if(str!="" && current_date!="" && weekend!=""){
+	 $.ajax({
+		 type:"POST",
+		 data:"str="+str+"&current_date="+current_date+"&weekend="+weekend,
+		 url:"sendMail.php",
+		 success: function(msg){
+			 alert(msg);
+			 }
+		 });
+	 }
+	 else{
+		 if(str==""){
+			 alert("No Email is Selected");
+			 }
+			 else{
+				 alert("Select duration First");
+				 }
+		 }
+		});
+		
+});
+</script>
+</head>
+<body>
+<h1>Time Tracker Mail Sender</h1><br>
+<h2>Existing users :</h2><br>
+
+
+
+
+
+<div id="users_area">
+
+</div>
+<br>Select Task Duration:
+<input type="date" id="current_date" name="current_date">
+<input type="date" id="weekend" name="weekend">
+<input type="button" value="Send Mail" id="sendMail" name="sendmail">
+</body>
+</html>
